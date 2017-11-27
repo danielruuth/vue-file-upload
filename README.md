@@ -7,7 +7,7 @@ File upload component
 * overall progress bar
 * no dependency
 
-![demo](https://cloud.githubusercontent.com/assets/25509586/25576519/15bbca56-2e60-11e7-84ac-691f5be31de4.gif)
+Original fileuploader by Frank Freiburger, modified for Laravel by Daniel Ruuth
 
 
 ## Browser support
