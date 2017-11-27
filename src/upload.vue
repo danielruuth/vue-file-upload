@@ -302,6 +302,12 @@ module.exports = {
 				fd.append('data', this.data);
 			
 			xhr.open('POST', this.url, true);
+			
+			let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+		        if(csrfToken!=null){
+			  xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+		        }
+			
 			xhr.send(fd);
 		},
 		enter: function(ev) {
