@@ -1,5 +1,5 @@
 {
-  "name": "danielruuth/vue-file-upload",
+  "name": "danielruuth-vue-file-upload",
   "version": "1.0.3",
   "description": "file upload widget",
   "main": "src/upload.vue",
@@ -14,7 +14,7 @@
     "file",
     "upload"
   ],
-  "author": "Franck FREIBURGER with additions by Daniel Ruuth",
+  "author": "Original source by Franck FREIBURGER, this fork with additions by Daniel Ruuth",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/danielruuth/vue-file-upload/issues"

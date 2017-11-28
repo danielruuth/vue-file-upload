@@ -12,7 +12,8 @@
 			<a href="#" class="cancel" @click.prevent="free"></a>
 		</div>
 		<label :for="!uploads.length || multiple ? 'inp'+_uid : ''" @dragenter.prevent.stop="enter" @dragleave.prevent.stop="leave" @dragover.prevent.stop="over" @drop.prevent.stop="drop" :title="uploadInfo"></label>
-	</div>
+    <input type="text" :value="reportedFilename" />
+  </div>
 </template>
 <style scoped>
 
@@ -26,17 +27,18 @@
 	}
 	.root {
 		position: relative;
-		display: inline-block;
+		display: block;
 		min-width: 5em;
 		min-height: 5em;
 		background-color: #eee;
+    border-radius: 2px;
 	}
-	
+
 	form,
 	iframe {
 		display: none;
 	}
-	
+
 	.notice,
 	.slot {
 		position: absolute;
@@ -44,7 +46,7 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 	}
-	
+
 	label,
 	.root:before {
 		position: absolute;
@@ -53,19 +55,19 @@
 		bottom: 0;
 		left: 0;
 	}
-	
+
 	label {
 		background-color: #000;
 		opacity: 0;
 		cursor: pointer;
 	}
-	
+
 	.root:before {
 		content: '';
 		margin: 0.5em;
 		border: 0.25em dotted silver;
 	}
-	
+
 	.dropAllowed.root:before {
 		border-color: green;
 	}
@@ -73,11 +75,11 @@
 	.dropDenied.root:before {
 		border-color: red;
 	}
-	
+
 	.dropUndefined.root:before {
 		border-color: grey;
 	}
-	
+
 
 	.notice {
 		font-family: arial;
@@ -90,7 +92,7 @@
 		animation: notice 1s ease-in forwards;
 		text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
 	}
-	
+
 	.uploadSuccess .notice:before {
 		color: green;
 		content: '\2713';
@@ -109,12 +111,12 @@
 		height: 1em;
 		background-color: silver;
 	}
-	
+
 	.progress {
 		height: 100%;
 		background-color: grey;
 	}
-	
+
 	.cancel {
 		position: absolute;
 		z-index: 1;
@@ -129,11 +131,11 @@
 		text-decoration: none;
 		cursor: pointer;
 	}
-	
+
 	.cancel:before {
 		content: '\00A0x\00A0';
 	}
-	
+
 </style>
 <script>
 "use strict";
@@ -143,7 +145,7 @@ var hasFileAPI = window.FileReader && window.FormData;
 // hasFileAPI = false
 
 function isIFrameWindow(iframeElt) {
-	
+
 	try {
 		return iframeElt.contentWindow;
 	} catch(ex) {}
@@ -151,7 +153,7 @@ function isIFrameWindow(iframeElt) {
 }
 
 function hasDataTransferFileSupport(dataTransfer) {
-	
+
 	if ( !('types' in dataTransfer) )
 		return false;
 	for ( var i = 0; i < dataTransfer.types.length; ++i )
@@ -201,20 +203,20 @@ module.exports = {
 			tick: 0,
 		}
 	},
-	
+
 	computed: {
 		uploadInfo: function() {
-			
+
 			var filenameList = [];
 			for ( var i = 0; i < this.uploads.length; ++i )
 				Array.prototype.push.apply(filenameList, this.uploads[i].filenameList);
 			return filenameList.map(function(item) { return '\u2022 ' + item }).join('\n');
 		},
 		progressStyle: function() {
-			
+
 			if ( this.uploads.length === 0 )
 				return undefined;
-			
+
 			var loadedRatio = this.loaded / this.total;
 			if ( isNaN(loadedRatio) )
 				return { width: '50%', marginLeft: (50 - Math.abs(this.tickNext() % 50*2 - 50))+'%' };
@@ -222,47 +224,47 @@ module.exports = {
 				return { width: loadedRatio*100+'%' };
 		},
 	},
-	
+
 	watch: {
 		'uploads.length': function(length) {
-			
+
 			if ( length !== 0 )
 				return;
 			this.loaded = 0;
 			this.total = 0;
 		}
 	},
-	
+
 	methods: {
 		tickNext: function() {
 
 			window.setTimeout(function() {
-			
+
 				this.tick++;
 			}.bind(this), 250);
 			return this.tick;
 		},
-		
+
 		uploaded: function(status, responseText) {
-			
+
 			var feedback = function(success) {
-			
+
 				this.uploadState = success ? 'uploadSuccess' : 'uploadFailure';
 				window.setTimeout(function() {
-				
+
 					this.uploadState = '';
 				}.bind(this), 1000);
 			}.bind(this);
-			
-			this.done(status, responseText, feedback);
+
+      this.done(status, responseText, feedback);
 		},
 		uploadFiles: function(files) {
-			
+
 			var xhr = new XMLHttpRequest();
 
 			var info = {
 				free: function() {
-					
+
 					xhr.onreadystatechange = null;
 					xhr.upload.onprogress = null;
 					if ( xhr.readyState !== 4 )
@@ -272,10 +274,10 @@ module.exports = {
 				filenameList: [],
 			}
 			this.uploads.push(info);
-			
+
 			var prevLoadedBytes = 0;
 			xhr.upload.onprogress = function(ev) {
-				
+
 				if ( !ev.lengthComputable )
 					return;
 				this.loaded += ev.loaded - prevLoadedBytes;
@@ -283,49 +285,49 @@ module.exports = {
 			}.bind(this);
 
 			xhr.onreadystatechange = function() {
-				
+
 				if ( xhr.readyState !== 4 )
 					return;
 				info.free();
 				this.uploaded(xhr.status, xhr.responseText);
 			}.bind(this);
-			
+
 			var fd = new FormData;
 			for ( var i = 0; i < files.length; ++i ) {
-				
+
 				info.filenameList.push(files[i].name);
 				this.total += files[i].size;
 				fd.append('file', files[i]);
 			}
-			
+
 			if ( 'data' in this )
 				fd.append('data', this.data);
-			
+
 			xhr.open('POST', this.url, true);
-			
+
 			let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 		        if(csrfToken!=null){
 			  xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
 		        }
-			
+
 			xhr.send(fd);
 		},
 		enter: function(ev) {
-			
+
 			if ( this.uploads.length && !this.multiple ) {
-				
+
 				this.dropState = 'dropDenied';
 				return;
 			}
 
 			if ( hasFileAPI && hasDataTransferFileSupport(ev.dataTransfer) ) {
-				
+
 				if ( ('items' in ev.dataTransfer) && ev.dataTransfer.items.length > 1 && !this.multiple )
 					this.dropState = 'dropDenied';
 				else
 					this.dropState = 'dropAllowed';
 			} else {
-				
+
 				this.dropState = 'dropUndefined';
 			}
 		},
@@ -338,37 +340,37 @@ module.exports = {
 			if ( hasFileAPI && hasDataTransferFileSupport(ev.dataTransfer) )
 				ev.dataTransfer.dropEffect = (this.dropState === 'dropDenied' ? 'none' : '');
 		},
-		
+
 		drop: function(ev) {
-			
+
 			window.setTimeout(function() {
-			
+
 				this.dropState = '';
 			}.bind(this), 500);
 
 			if ( this.uploads.length && !this.multiple ) {
-				
+
 				this.dropState = 'dropDenied';
 				return;
 			}
 
 			if ( hasFileAPI && hasDataTransferFileSupport(ev.dataTransfer) ) {
-				
+
 				var files = Array.prototype.slice.call(ev.dataTransfer.files);
 				var acceptFiles = !files.some(function(file) {
-					
+
 					return !this.accept(file.name);
 				}.bind(this));
-				
+
 				if ( !acceptFiles || ev.dataTransfer.files.length === 0 || ev.dataTransfer.files.length > 1 && !this.multiple ) {
-				
+
 					this.dropState = 'dropDenied';
 				} else {
-					
+
 					this.uploadFiles(ev.dataTransfer.files);
 				}
 			} else {
-			
+
 				this.$nextTick(function() {
 
 					if ( ev.target.htmlFor )
@@ -377,35 +379,35 @@ module.exports = {
 			}
 		},
 		onchange: function(ev) {
-			
+
 			var formElt = ev.target.form;
 			if ( hasFileAPI && 'files' in ev.target ) {
-				
+
 				this.uploadFiles(ev.target.files);
 				formElt.reset();
 			} else {
-				
+
 				this.total += NaN;
 				var name = this._uid+'ifr'+Date.now();
 
 				var filename = ev.target.value.match(/[^\/\\]*$/)[0];
 				if ( !this.accept(filename) ) {
-					
+
 					formElt.reset();
 					this.dropState = 'dropDenied';
-					
+
 					window.setTimeout(function() {
-					
+
 						this.dropState = '';
 					}.bind(this), 500);
-					
+
 					return;
 				}
-				
+
 				this.uploads.unshift({
 					ifr: name,
 					free: function() {
-						
+
 						window.document.getElementsByName(name)[0].src = "about:blank";
 
 						for ( var i = 0; i < this.uploads.length; ++i )
@@ -416,31 +418,31 @@ module.exports = {
 				});
 
 				this.$nextTick(function() {
-					
+
 					formElt.submit();
 					this.$nextTick(function() {
-					
+
 						formElt.reset();
 					});
 				});
 			}
 		},
-		
+
 		onload: function(iframeElt, name) {
-			
+
 			var iframeWin = isIFrameWindow(iframeElt);
 			if ( iframeWin !== null && iframeWin.document.location.href === 'about:blank' )
 				return;
-			
+
 			for ( var i = 0; i < this.uploads.length; ++i )
 				if ( this.uploads[i].ifr === name )
 					this.uploads[i].free();
 
 			this.uploaded(undefined, iframeWin !== null ? iframeWin.document.documentElement.innerText : '');
 		},
-		
+
 		free: function() {
-			
+
 			for ( var i = this.uploads.length-1; i >= 0 ; --i )
 				this.uploads[i].free();
 		}
