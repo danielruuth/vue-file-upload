@@ -1,6 +1,6 @@
 {
   "name": "danielruuth-vue-file-upload",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "file upload widget",
   "main": "src/upload.vue",
   "scripts": {},
