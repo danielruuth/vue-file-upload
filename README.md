@@ -25,7 +25,7 @@ Same browser support as [Vue.js 2](https://github.com/vuejs/vue/blob/dev/README.
 
 ## Install
 ```
-npm install --save @franck.freiburger/vue-file-upload
+npm install --save danielruuth-vue-file-upload
 ```
 
 ## API
@@ -56,7 +56,7 @@ See [capture attribute](https://www.w3.org/TR/html-media-capture/#the-capture-at
 #### :accept <sup>function(filename) returns boolean<sup>
 
 Called before a file is about to be uploaded. Return `false` to reject the upload, otherwise return `true`.
-  
+
 `filename`: The filename (without path) of the file.  
 
 By default any file is accepted.
@@ -65,7 +65,7 @@ By default any file is accepted.
 #### :done <sup>function(status, responseText, feedback)<sup>
 
 Called when a file or a set of files has been uploaded.
-  
+
 `status`: HTTP status of the upload or `undefined` if no status is available (IE9).  
 `responseText`: reponse of the server.  
 `feedback`: function you can call to give a positive or negative (`true`/`false`) UI feedback about the upload.  
@@ -83,7 +83,7 @@ Extra data sent with files (name=data).
 #### default slot
 
 This slot is included at the center of the component.
-  
+
 exemple:
 ```
 <upload url='/upload' image capture><i class="fa fa-camera fa-2x"></i></upload>
@@ -93,3 +93,4 @@ exemple:
 
 ## Credits
 [<img src="https://www.franck-freiburger.com/FF.png" width="16"> Franck Freiburger](https://www.franck-freiburger.com)
+[Daniel Ruuth](http://www.mondayhero.com)
