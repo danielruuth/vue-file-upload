@@ -1,37 +1,35 @@
 <template>
 	<div class="root" :class="[dropState, uploadState]">
 		<form :target="uploads.length && uploads[0].ifr" :action="url" method="post" enctype="multipart/form-data">
-			<input :id="'inp'+_uid" name="file" type="file" :accept="image ? 'image/*' : undefined" :capture="capture" @change="onchange" :multiple="multiple">
+			<input :id="'inp'+_uid" name="file" type="file" :accept="validFileTypes" :capture="capture" @change="onchange" :multiple="multiple">
 			<input v-if="!hasFileAPI && data !== undefined" type="hidden" name="data" :value="data">
 		</form>
 		<iframe v-for="item in uploads" v-if="item.ifr" :key="item.ifr" :name="item.ifr" src="about:blank" @load="onload($event.target, item.ifr)"></iframe>
 		<div v-if="$slots.default" class="slot"><slot></slot></div>
-		<div class="notice"></div>
-		<div v-show="uploads.length" class="progressBar">
-			<div class="progress" :style="progressStyle"></div>
-			<a href="#" class="cancel" @click.prevent="free"></a>
-		</div>
-		<label :for="!uploads.length || multiple ? 'inp'+_uid : ''" @dragenter.prevent.stop="enter" @dragleave.prevent.stop="leave" @dragover.prevent.stop="over" @drop.prevent.stop="drop" :title="uploadInfo"></label>
-    <input type="text" :value="reportedFilename" />
+		<label :class="(loading) ? 'loading' : ''" :for="!uploads.length || multiple ? 'inp'+_uid : ''" @dragenter.prevent.stop="enter" @dragleave.prevent.stop="leave" @dragover.prevent.stop="over" @drop.prevent.stop="drop" :title="uploadInfo">{{buttonLabel}}
+      <span class="loading-icon" v-if="loading">
+        <svg width="20px"  height="20px"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-flickr" style="background: none;">
+            <circle cy="50" cx="56.5712" fill="#63DBC1" r="20">
+              <animate attributeName="cx" calcMode="linear" values="30;70;30" keyTimes="0;0.5;1" dur="1" begin="-0.5s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cy="50" cx="43.4288" fill="#ffffff" r="20">
+              <animate attributeName="cx" calcMode="linear" values="30;70;30" keyTimes="0;0.5;1" dur="1" begin="0s" repeatCount="indefinite"></animate>
+            </circle>
+            <circle cy="50" cx="56.5712" fill="#63DBC1" r="20">
+              <animate attributeName="cx" calcMode="linear" values="30;70;30" keyTimes="0;0.5;1" dur="1" begin="-0.5s" repeatCount="indefinite"></animate>
+              <animate attributeName="fill-opacity" values="0;0;1;1" calcMode="discrete" keyTimes="0;0.499;0.5;1" repeatCount="indefinite" dur="1s"></animate>
+            </circle>
+          </svg>
+    </span></label>
+    <span class="current-value">{{currentValue}}</span>
   </div>
 </template>
 <style scoped>
 
-	@keyframes notice {
-		from {
-			opacity: 1;
-		}
-		to {
-			opacity: 0;
-		}
-	}
+
 	.root {
 		position: relative;
 		display: block;
-		min-width: 5em;
-		min-height: 5em;
-		background-color: #eee;
-    border-radius: 2px;
 	}
 
 	form,
@@ -47,94 +45,49 @@
 		transform: translate(-50%, -50%);
 	}
 
-	label,
-	.root:before {
-		position: absolute;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
-	}
+
 
 	label {
-		background-color: #000;
-		opacity: 0;
+    display:inline-block;
+		background-color: #319bf5;
 		cursor: pointer;
+    color: #fff;
+    border-radius: 2px;
+    text-align: center;
+    padding: 4px 12px 4px 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 10px;
+    position: relative;
+    transition: all 0.2s linear;
 	}
 
-	.root:before {
-		content: '';
-		margin: 0.5em;
-		border: 0.25em dotted silver;
-	}
+  label.loading{
+    padding: 4px 24px 4px 24px;
+  }
 
-	.dropAllowed.root:before {
-		border-color: green;
-	}
+  .loading-icon{
+    position: absolute;
+    top: 2px;
+    right: 8px;
+  }
 
-	.dropDenied.root:before {
-		border-color: red;
-	}
+  label:hover{
+    background-color: #3ad1b1;
+  }
 
-	.dropUndefined.root:before {
-		border-color: grey;
-	}
-
+  .current-value{
+    font-weight: 100;
+    padding: 0 0 0 8px;
+  }
 
 	.notice {
-		font-family: arial;
 		font-weight: bold;
 		font-size: 250%;
 	}
 
-	.uploadSuccess .notice,
-	.uploadFailure .notice {
-		animation: notice 1s ease-in forwards;
-		text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
-	}
 
-	.uploadSuccess .notice:before {
-		color: green;
-		content: '\2713';
-	}
-
-	.uploadFailure .notice:before {
-		color: red;
-		content: '\2717';
-	}
-
-	.progressBar {
-		position: absolute;
-		left: 1em;
-		bottom: 1em;
-		right: 1em;
-		height: 1em;
-		background-color: silver;
-	}
-
-	.progress {
-		height: 100%;
-		background-color: grey;
-	}
-
-	.cancel {
-		position: absolute;
-		z-index: 1;
-		top: 50%;
-		margin-top: -0.6em;
-		height: 100%;
-		right: 0;
-
-		font-family: arial;
-		font-weight: bold;
-		color: red;
-		text-decoration: none;
-		cursor: pointer;
-	}
-
-	.cancel:before {
-		content: '\00A0x\00A0';
-	}
 
 </style>
 <script>
@@ -168,6 +121,13 @@ module.exports = {
 			type: String,
 			required: true,
 		},
+    buttonLabel:{
+      type: String,
+      default: 'Select file'
+    },
+    currentValue:{
+      type:String
+    },
 		multiple: {
 			type: Boolean,
 			default: false,
@@ -176,21 +136,31 @@ module.exports = {
 			type: Boolean,
 			default: false,
 		},
+    serverResult:{
+      type:String,
+      default: null
+    },
 		capture: {
 			type: Boolean,
 			default: false,
 		},
+    validFileTypes:{
+      type:String,
+      default: ".gif|.png|.jpg|.jpeg"
+    },
 		accept: {
 			type: Function,
-			default: function(filename) { return true },
-		},
+			default: function(filename) {
+        return true
+        }
+    },
 		done: {
 			type: Function,
 			default: function(status, responseText, feedback) { status !== undefined && feedback(status >= 200 && status < 400) },
 		},
 		data: {
 			type: String,
-		}
+		},
 	},
 	data: function() {
 		return {
@@ -201,6 +171,7 @@ module.exports = {
 			total: 0,
 			loaded: 0,
 			tick: 0,
+      loading: false
 		}
 	},
 
@@ -246,7 +217,7 @@ module.exports = {
 		},
 
 		uploaded: function(status, responseText) {
-
+      this.loading = false;
 			var feedback = function(success) {
 
 				this.uploadState = success ? 'uploadSuccess' : 'uploadFailure';
@@ -256,7 +227,9 @@ module.exports = {
 				}.bind(this), 1000);
 			}.bind(this);
 
-      this.done(status, responseText, feedback);
+      this.serverResult = JSON.parse(responseText).filename;
+      this.currentValue = this.serverResult;
+			this.done(status, responseText, feedback);
 		},
 		uploadFiles: function(files) {
 
@@ -302,13 +275,13 @@ module.exports = {
 
 			if ( 'data' in this )
 				fd.append('data', this.data);
-
+      this.loading = true;
 			xhr.open('POST', this.url, true);
 
 			let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-		        if(csrfToken!=null){
+		  if(csrfToken!=null){
 			  xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
-		        }
+		  }
 
 			xhr.send(fd);
 		},
